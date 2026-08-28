@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Airline Satisfaction</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+<canvas id="stars"></canvas>
+<div class="grid-overlay"></div>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="nav-inner">
+    <div class="nav-logo">
+      <img src="/static/logo.png" alt="Airline satisfaction" class="logo-img" onerror="this.style.display='none'">
+    </div>
+    <div class="nav-badge"><span class="pulse-dot"></span>ML Powered</div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg-text">FLIGHT</div>
+  <div class="hero-content">
+    <div class="hero-tag fade-up" style="--d:0ms">PASSENGER EXPERIENCE AI</div>
+    <h1 class="hero-title fade-up" style="--d:80ms">Predict<br><span class="grad">Satisfaction</span></h1>
+    <p class="hero-sub fade-up" style="--d:160ms">Enter passenger details and service ratings — our trained ML model scores the journey instantly.</p>
+    <a href="#app" class="cta fade-up" style="--d:240ms">Launch Predictor <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+  </div>
+  <div class="hero-visual fade-up" style="--d:120ms">
+    <div class="ring r1"></div>
+    <div class="ring r2"></div>
+    <div class="ring r3"></div>
+    <div class="odot od1"></div>
+    <div class="odot od2"></div>
+    <svg class="plane" viewBox="0 0 160 160" fill="none">
+      <path d="M80 10 L98 80 L80 72 L62 80 Z" fill="url(#pg)"/>
+      <path d="M56 64 L16 76 L64 80Z" fill="url(#wg)" opacity=".85"/>
+      <path d="M104 64 L144 76 L96 80Z" fill="url(#wg)" opacity=".85"/>
+      <path d="M74 72 L68 96 L80 90 L92 96 L86 72Z" fill="url(#tg)" opacity=".75"/>
+      <defs>
+        <linearGradient id="pg" x1="80" y1="10" x2="80" y2="80" gradientUnits="userSpaceOnUse"><stop stop-color="#38bdf8"/><stop offset="1" stop-color="#818cf8"/></linearGradient>
+        <linearGradient id="wg" x1="0" y1="0" x2="160" y2="0" gradientUnits="userSpaceOnUse"><stop stop-color="#38bdf8" stop-opacity=".7"/><stop offset="1" stop-color="#818cf8" stop-opacity=".7"/></linearGradient>
+        <linearGradient id="tg" x1="80" y1="72" x2="80" y2="96" gradientUnits="userSpaceOnUse"><stop stop-color="#818cf8"/><stop offset="1" stop-color="#e879f9"/></linearGradient>
+      </defs>
+    </svg>
+  </div>
+</section>
+
+<!-- APP -->
+<section id="app" class="app-section">
+  <p class="section-eyebrow">// INPUT PARAMETERS</p>
+
+  {% if not models_loaded %}
+  <div class="alert">
+    ⚠ Model files not found. Add your <code>.pkl</code> files to the <code>artifacts/</code> folder then restart the server.
+  </div>
+  {% endif %}
+
+  <div class="grid2">
+
+    <!-- CARD 1: Passenger -->
+    <div class="card">
+      <div class="card-head">
+        <div class="cicon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="1.5"/></svg>
+        </div>
+        <h2>Passenger &amp; Trip</h2>
+      </div>
+
+      <div class="fstack">
+
+        <div class="fgroup">
+          <label>Gender</label>
+          <div class="tog" id="tg-gender">
+            <button class="tb active" data-v="Male"             onclick="tog(this,'tg-gender','gender')">Male</button>
+            <button class="tb"        data-v="Female"           onclick="tog(this,'tg-gender','gender')">Female</button>
+          </div>
+          <input type="hidden" id="gender" value="Male">
+        </div>
+
+        <div class="fgroup">
+          <label>Customer Type</label>
+          <div class="tog" id="tg-cust">
+            <button class="tb active" data-v="Loyal Customer"    onclick="tog(this,'tg-cust','customer_type')">Loyal</button>
+            <button class="tb"        data-v="disloyal Customer" onclick="tog(this,'tg-cust','customer_type')">Disloyal</button>
+          </div>
+          <input type="hidden" id="customer_type" value="Loyal Customer">
+        </div>
+
+        <div class="fgroup">
+          <label>Type of Travel</label>
+          <div class="tog" id="tg-trav">
+            <button class="tb active" data-v="Business travel"  onclick="tog(this,'tg-trav','type_of_travel')">Business</button>
+            <button class="tb"        data-v="Personal Travel"  onclick="tog(this,'tg-trav','type_of_travel')">Personal</button>
+          </div>
+          <input type="hidden" id="type_of_travel" value="Business travel">
+        </div>
+
+        <div class="fgroup">
+          <label>Class</label>
+          <div class="tog" id="tg-class">
+            <button class="tb active" data-v="Business" onclick="tog(this,'tg-class','class_')">Business</button>
+            <button class="tb"        data-v="Eco Plus" onclick="tog(this,'tg-class','class_')">Eco Plus</button>
+            <button class="tb"        data-v="Eco"      onclick="tog(this,'tg-class','class_')">Eco</button>
+          </div>
+          <input type="hidden" id="class_" value="Business">
+        </div>
+
+        <div class="frow">
+          <div class="fgroup">
+            <label>Age</label>
+            <div class="numinput">
+              <button type="button" onclick="adj('age',-1)">−</button>
+              <input type="number" id="age" value="30" min="0" max="120">
+              <button type="button" onclick="adj('age',1)">+</button>
+            </div>
+          </div>
+          <div class="fgroup">
+            <label>Flight Distance (km)</label>
+            <div class="numinput">
+              <button type="button" onclick="adj('flight_distance',-100)">−</button>
+              <input type="number" id="flight_distance" value="1000" min="0">
+              <button type="button" onclick="adj('flight_distance',100)">+</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="frow">
+          <div class="fgroup">
+            <label>Departure Delay (min)</label>
+            <div class="numinput">
+              <button type="button" onclick="adj('departure_delay',-5)">−</button>
+              <input type="number" id="departure_delay" value="0" min="0">
+              <button type="button" onclick="adj('departure_delay',5)">+</button>
+            </div>
+          </div>
+          <div class="fgroup">
+            <label>Arrival Delay (min)</label>
+            <div class="numinput">
+              <button type="button" onclick="adj('arrival_delay',-5)">−</button>
+              <input type="number" id="arrival_delay" value="0" min="0">
+              <button type="button" onclick="adj('arrival_delay',5)">+</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- CARD 2: Service Ratings -->
+    <div class="card">
+      <div class="card-head">
+        <div class="cicon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+        </div>
+        <h2>Service Ratings</h2>
+      </div>
+      <div class="ratings-wrap">
+        <div class="rating-item" data-id="inflight_wifi_service"><span>Inflight WiFi</span><div class="stars"></div><input type="hidden" value="3"></div>
+        <div class="rating-item" data-id="departure_arrival_time_convenient"><span>Departure/Arrival Time</span><div class="stars"></div><input type="hidden" value="3"></div>
+        <div class="rating-item" data-id="ease_of_online_booking"><span>Online Booking</span><div class="stars"></div><input type="hidden" value="3"></div>
+        <div class="rating-item" data-id="gate_location"><span>Gate Location</span><div class="stars"></div><input type="hidden" value="3"></div>
+        <div class="rating-item" data-id="food_and_drink"><span>Food &amp; Drink</span><div class="stars"></div><input type="hidden" value="3"></div>
+        <div class="rating-item" data-id="online_boarding"><span>Online Boarding</span><div class="stars"></div><input type="hidden" value="3"></div>
+        <div class="rating-item" data-id="seat_comfort"><span>Seat Comfort</span><div class="stars"></div><input type="hidden" value="3"></div>
+        <div class="rating-item" data-id="inflight_entertainment"><span>Inflight Entertainment</span><div class="stars"></div><input type="hidden" value="3"></div>
+        <div class="rating-item" data-id="on_board_service"><span>On-Board Service</span><div class="stars"></div><input type="hidden" value="3"></div>
+        <div class="rating-item" data-id="leg_room_service"><span>Leg Room</span><div class="stars"></div><input type="hidden" value="3"></div>
+        <div class="rating-item" data-id="baggage_handling"><span>Baggage Handling</span><div class="stars"></div><input type="hidden" value="3"></div>
+        <div class="rating-item" data-id="checkin_service"><span>Check-in Service</span><div class="stars"></div><input type="hidden" value="3"></div>
+        <div class="rating-item" data-id="inflight_service"><span>Inflight Service</span><div class="stars"></div><input type="hidden" value="3"></div>
+        <div class="rating-item" data-id="cleanliness"><span>Cleanliness</span><div class="stars"></div><input type="hidden" value="3"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- PREDICT BTN -->
+  <div class="predict-row">
+    <button id="pred-btn" onclick="predict()">
+      <span id="btn-text">Predict Satisfaction</span>
+      <div id="btn-spin" class="spinner" style="display:none"></div>
+      <svg id="btn-arrow" width="21" height="21" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+
+  <!-- RESULT -->
+  <div id="result" style="display:none">
+    <div id="result-card" class="result-card">
+      <div id="res-icon" class="res-icon"></div>
+      <div class="res-body">
+        <div id="res-label" class="res-label"></div>
+        <div id="res-desc"  class="res-desc"></div>
+      </div>
+      <div id="res-pct" class="res-pct"></div>
+    </div>
+    <div id="bar-wrap" class="bar-wrap" style="display:none">
+      <div class="bar-meta"><span>Model Confidence</span><span id="bar-pct-lbl"></span></div>
+      <div class="bar-track"><div id="bar-fill" class="bar-fill"></div></div>
+    </div>
+  </div>
+
+</section>
+
+<footer class="footer">Airline Satisfaction Predictor &nbsp;·&nbsp; Powered by Machine Learning</footer>
+
+<script src="/static/js/main.js"></script>
+</body>
+</html>
